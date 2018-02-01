@@ -213,7 +213,7 @@ void eval(char *cmdline)
     } else {
       int* something;
       addjob(jobs, child, FG, cmdline);
-      waitfg()
+      waitfg(child);
       deletejob(jobs, child);
     }
 
@@ -350,8 +350,8 @@ void sigchld_handler(int sig)
 
     if(WIFSTOPPED(status) == 1) {
       //process has stopped, update the jobs
-      job_t updater = getjobpid(p);
-      updater.state = ST;
+      struct job_t* updater = getjobpid(jobs, p);
+      updater->state = ST;
     } else if(WIFEXITED(status) == 1) {
       //do something else, the process just ran its course
     } else if(WIFSIGNALED(status) == 1) {
@@ -369,6 +369,8 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig)
 {
+
+
     return;
 }
 
