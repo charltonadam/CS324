@@ -194,7 +194,7 @@ void eval(char *cmdline)
     addjob(jobs, child, BG, cmdline);
     struct job_t* updater = getjobpid(jobs, child);
     printf("[%d] (%d) %s", updater->jid, updater->pid, updater->cmdline);
-    fflush(stdout);
+    //fflush(stdout);
 
 
 
@@ -214,15 +214,14 @@ void eval(char *cmdline)
 
       exit(0);   //I don't know whats going on, so exit it for now
     } else {
+
       int* something;
       addjob(jobs, child, FG, cmdline);
-      struct job_t* updater = getjobpid(jobs, child);
-      printf("[%d] (%d) %s", updater->jid, updater->pid, updater->cmdline);
-      fflush(stdout);
+      //struct job_t* updater = getjobpid(jobs, child);
+      //printf("[%d] (%d) %s", updater->jid, updater->pid, updater->cmdline);
+      //fflush(stdout);
       waitfg(child);
-      deletejob(jobs, child);
     }
-
   }
 
 
@@ -305,8 +304,28 @@ int builtin_cmd(char **argv)
       return 1;
     } else if(strcmp(argv[0], bg) == 0) {
 
+      struct job_t* updater = getjobjid(jobs, atoi(argv[1]));
+
+      if(updater->state != ST) {
+        //error
+      } else {
+        updater->state = BG;
+        kill(updater->pid, SIGCONT);
+      }
+
       return 1;
     } else if(strcmp(argv[0], fg) == 0) {
+
+      struct job_t* updater = getjobjid(jobs, atoi(argv[1]));
+      if(updater->state != ST || updater->state != BG) {
+        //error
+      } else {
+        updater->state = FG;
+        kill(updater->pid, SIGCONT);
+        waitfg(updater->pid);
+      }
+
+
 
       return 1;
     }
@@ -354,15 +373,17 @@ void sigchld_handler(int sig)
     pid_t p;
     int status;
     p = waitpid(-1, &status, WNOHANG | WUNTRACED);
+    struct job_t* updater = getjobpid(jobs, p);
 
     if(WIFSTOPPED(status) == 1) {
       //process has stopped, update the jobs
-      struct job_t* updater = getjobpid(jobs, p);
       updater->state = ST;
     } else if(WIFEXITED(status) == 1) {
+      deletejob(jobs, p);
       //do something else, the process just ran its course
     } else if(WIFSIGNALED(status) == 1) {
-      printf("terminated");
+      printf("Job [%d] (%d) terminated by signal %d\n", updater->jid, updater->pid, sig);
+      deletejob(jobs, p);
       //child was terminated by the terminator
     }
 
@@ -380,6 +401,7 @@ void sigint_handler(int sig)
     pid_t p = fgpid(jobs);
     if(p != 0)
     {
+        killpg(p, sig);
         kill(p, sig);
     }
 
@@ -396,6 +418,7 @@ void sigtstp_handler(int sig)
     pid_t p = fgpid(jobs);
     if(p != 0)
     {
+        killpg(p, sig);
         kill(p, sig);
     }
     return;
