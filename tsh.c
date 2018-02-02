@@ -178,6 +178,7 @@ void eval(char *cmdline)
 
 
   if( bg == 1 ) {
+
     int child;
 
     if( (child = fork()) == 0 ) {
@@ -200,7 +201,6 @@ void eval(char *cmdline)
   } else {
     //printf("foreground job\n");
     //fflush(stdout);
-
 
     int child;
 
@@ -322,10 +322,11 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
+    /*
     while(fgpid(jobs) != 0)
     {
       sleep(1);
-    }
+    }*/
 
     return;
 }
