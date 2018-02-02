@@ -192,6 +192,9 @@ void eval(char *cmdline)
     //the parent should make the jobs in order to have the pid
 
     addjob(jobs, child, BG, cmdline);
+    struct job_t* updater = getjobpid(jobs, child);
+    printf("[%d] (%d) %s" updater.jid, updater.pid, updater.cmdline);
+    fflush(stdout);
 
 
 
@@ -213,6 +216,9 @@ void eval(char *cmdline)
     } else {
       int* something;
       addjob(jobs, child, FG, cmdline);
+      struct job_t* updater = getjobpid(jobs, child);
+      printf("[%d] (%d) %s" updater.jid, updater.pid, updater.cmdline);
+      fflush(stdout);
       waitfg(child);
       deletejob(jobs, child);
     }
@@ -322,11 +328,11 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
-    /*
+
     while(fgpid(jobs) != 0)
     {
       sleep(1);
-    }*/
+    }
 
     return;
 }
