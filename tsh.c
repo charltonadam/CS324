@@ -356,6 +356,7 @@ void sigchld_handler(int sig)
     } else if(WIFEXITED(status) == 1) {
       //do something else, the process just ran its course
     } else if(WIFSIGNALED(status) == 1) {
+      printf("terminated");
       //child was terminated by the terminator
     }
 
@@ -386,6 +387,11 @@ void sigint_handler(int sig)
  */
 void sigtstp_handler(int sig)
 {
+    pid_t p = fgpid(jobs);
+    if(p != 0)
+    {
+        kill(p, sig);
+    }
     return;
 }
 
