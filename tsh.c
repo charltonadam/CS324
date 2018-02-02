@@ -193,7 +193,7 @@ void eval(char *cmdline)
 
     addjob(jobs, child, BG, cmdline);
     struct job_t* updater = getjobpid(jobs, child);
-    printf("[%d] (%d) %s", updater.jid, updater.pid, updater.cmdline);
+    printf("[%d] (%d) %s", updater->jid, updater->pid, updater->cmdline);
     fflush(stdout);
 
 
@@ -217,7 +217,7 @@ void eval(char *cmdline)
       int* something;
       addjob(jobs, child, FG, cmdline);
       struct job_t* updater = getjobpid(jobs, child);
-      printf("[%d] (%d) %s", updater.jid, updater.pid, updater.cmdline);
+      printf("[%d] (%d) %s", updater->jid, updater->pid, updater->cmdline);
       fflush(stdout);
       waitfg(child);
       deletejob(jobs, child);
