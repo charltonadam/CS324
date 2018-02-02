@@ -369,7 +369,11 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig)
 {
-
+    pid_t p = fgpid(jobs);
+    if(p != 0)
+    {
+        kill(p, sig);
+    }
 
     return;
 }
