@@ -307,7 +307,7 @@ int builtin_cmd(char **argv)
     } else if(strcmp(argv[0], bg) == 0) {
       //TODO: implement % for job IDs
 
-      struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));;
+      struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));
       int a = atoi(argv[1]);
       if(a < 0 || a > 16) {
         return;
@@ -329,8 +329,6 @@ int builtin_cmd(char **argv)
 
       return 1;
     } else if(strcmp(argv[0], fg) == 0) {
-
-      struct job_t* updater;
 
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));;
       int a = atoi(argv[1]);
