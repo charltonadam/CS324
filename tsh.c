@@ -303,10 +303,16 @@ int builtin_cmd(char **argv)
       listjobs(jobs);
       return 1;
     } else if(strcmp(argv[0], bg) == 0) {
+      struct job_t* updater;
 
-      struct job_t* updater = getjobjid(jobs, atoi(argv[1]));
+      if(argv[1][0] == '%') {
+        //background getjob
+        updater = getjobjid(jobs, atoi(argv[1]));
+      } else {
+        updater = getjobpid(jobs, atoi(argv[1]));
+      }
 
-      if(updater->state != ST) {
+      if(updater == NULL || updater->state != ST) {
         //error
       } else {
         updater->state = BG;
@@ -316,8 +322,16 @@ int builtin_cmd(char **argv)
       return 1;
     } else if(strcmp(argv[0], fg) == 0) {
 
-      struct job_t* updater = getjobjid(jobs, atoi(argv[1]));
-      if(updater->state != ST || updater->state != BG) {
+      struct job_t* updater;
+
+      if(argv[1][0] == '%') {
+        //background getjob
+        updater = getjobjid(jobs, atoi(argv[1]));
+      } else {
+        updater = getjobpid(jobs, atoi(argv[1]));
+      }
+
+      if(updater == NULL || updater->state != ST || updater->state != BG) {
         //error
       } else {
         updater->state = FG;
