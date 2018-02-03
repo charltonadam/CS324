@@ -184,6 +184,7 @@ void eval(char *cmdline)
     if( (child = fork()) == 0 ) {
       //printf("I'm a child\n");
 
+      setpgid(0,0);
       execve(arguments[0], &arguments[0], newenviron);
 
       exit(0);   //I don't know whats going on, so exit it for now
@@ -210,6 +211,7 @@ void eval(char *cmdline)
     if( (child = fork()) == 0 ) {
       //printf("I'm a child\n");
 
+      setpgid(0,0);
       execve(arguments[0], &arguments[0], newenviron);
 
       exit(0);   //I don't know whats going on, so exit it for now
@@ -303,6 +305,7 @@ int builtin_cmd(char **argv)
       listjobs(jobs);
       return 1;
     } else if(strcmp(argv[0], bg) == 0) {
+      //TODO: implement % for job IDs
 
       struct job_t* updater = getjobjid(jobs, atoi(argv[1]));
 
@@ -310,7 +313,7 @@ int builtin_cmd(char **argv)
         //error
       } else {
         updater->state = BG;
-        kill(updater->pid, SIGCONT);
+        kill(0-updater->pid, SIGCONT);
       }
 
       return 1;
@@ -321,7 +324,7 @@ int builtin_cmd(char **argv)
         //error
       } else {
         updater->state = FG;
-        kill(updater->pid, SIGCONT);
+        kill(0-updater->pid, SIGCONT);
         waitfg(updater->pid);
       }
 
@@ -372,22 +375,21 @@ void sigchld_handler(int sig)
 
     pid_t p;
     int status;
-    p = waitpid(-1, &status, WNOHANG | WUNTRACED);
-    struct job_t* updater = getjobpid(jobs, p);
+    while( (p = waitpid(-1, &status, WNOHANG | WUNTRACED)) != 0) {
+      struct job_t* updater = getjobpid(jobs, p);
 
-    if(WIFSTOPPED(status) == 1) {
-      //process has stopped, update the jobs
-      updater->state = ST;
-    } else if(WIFEXITED(status) == 1) {
-      deletejob(jobs, p);
-      //do something else, the process just ran its course
-    } else if(WIFSIGNALED(status) == 1) {
-      printf("Job [%d] (%d) terminated by signal %d\n", updater->jid, updater->pid, sig);
-      deletejob(jobs, p);
-      //child was terminated by the terminator
+      if(WIFSTOPPED(status) == 1) {
+        //process has stopped, update the jobs
+        updater->state = ST;
+      } else if(WIFEXITED(status) == 1) {
+        deletejob(jobs, p);
+        //do something else, the process just ran its course
+      } else if(WIFSIGNALED(status) == 1) {
+        printf("Job [%d] (%d) terminated by signal %d\n", updater->jid, updater->pid, sig);
+        deletejob(jobs, p);
+        //child was terminated by the terminator
+      }
     }
-
-
     return;
 }
 
@@ -401,8 +403,7 @@ void sigint_handler(int sig)
     pid_t p = fgpid(jobs);
     if(p != 0)
     {
-        killpg(p, sig);
-        kill(p, sig);
+        kill(0-p, sig);
     }
 
     return;
@@ -418,8 +419,7 @@ void sigtstp_handler(int sig)
     pid_t p = fgpid(jobs);
     if(p != 0)
     {
-        killpg(p, sig);
-        kill(p, sig);
+        kill(0-p, sig);
     }
     return;
 }
