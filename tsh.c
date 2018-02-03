@@ -310,7 +310,7 @@ int builtin_cmd(char **argv)
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));
       int a = atoi(argv[1]);
       if(a < 0 || a > 16) {
-        return;
+        return 1;
       }
 
       if(argv[1][0] == '%') {
@@ -333,7 +333,7 @@ int builtin_cmd(char **argv)
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));;
       int a = atoi(argv[1]);
       if(a < 0 || a > 16) {
-        return;
+        return 1;
       }
 
       if(argv[1][0] == '%') {
