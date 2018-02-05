@@ -309,7 +309,12 @@ int builtin_cmd(char **argv)
       listjobs(jobs);
       return 1;
     } else if(strcmp(argv[0], bg) == 0) {
-      //TODO: implement % for job IDs
+
+      if(argv[1] == NULL) {
+        printf("found one\n");
+      }
+
+
 
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));
       char* c = argv[1];
@@ -333,6 +338,15 @@ int builtin_cmd(char **argv)
 
       return 1;
     } else if(strcmp(argv[0], fg) == 0) {
+
+      if(argv[1] == NULL) {
+        printf("found one\n");
+      }
+
+
+
+
+
 
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));;
 
