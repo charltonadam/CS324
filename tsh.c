@@ -347,7 +347,7 @@ int builtin_cmd(char **argv)
       }
 
 
-      if(updater->state != ST || updater->state != BG) {
+      if(updater->state != ST && updater->state != BG) {
         //error
       } else {
         updater->state = FG;
