@@ -319,6 +319,8 @@ int builtin_cmd(char **argv)
 
       if(argv[1][0] == '%') {
         //background getjob
+        printf("ok, it works somehow\n");
+        printf("%d\n", atoi(argv[1]));
         updater = getjobjid(jobs, atoi(argv[1]));
       }
 
