@@ -190,6 +190,7 @@ void eval(char *cmdline)
 
       setpgid(0,0);
       execve(arguments[0], &arguments[0], newenviron);
+      printf("%s: command not found\n", arguments[0]);
 
 
       exit(0);   //I don't know whats going on, so exit it for now
@@ -218,6 +219,7 @@ void eval(char *cmdline)
 
       setpgid(0,0);
       execve(arguments[0], &arguments[0], newenviron);
+      printf("%s: command not found\n", arguments[0]);
 
       exit(0);   //I don't know whats going on, so exit it for now
     } else {
@@ -313,56 +315,94 @@ int builtin_cmd(char **argv)
     } else if(strcmp(argv[0], bg) == 0) {
 
       if(argCount < 2) {
-        printf("found one\n");
+        printf("bg command requires PID or %%jobid argument\n");
+        return 1;
       }
 
+      int percentFound = 0;
 
-
-      struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));
       char* c = argv[1];
-
-
-
       if(*c == '%') {
         c++;
-        int a = atoi(c);
+        percentFound++;
+      }
+      int a = atoi(c);
 
-        //background getjob
+      if(a == 0) {
+        printf("bg: argument must be a PID or %%jobid\n");
+        return 1;
+      }
+
+
+
+      struct job_t* updater  = getjobpid(jobs, a);
+      if(percentFound == 1) {
         updater = getjobjid(jobs, a);
       }
+      if(updater == NULL) {
+        if(percentFound == 1) {
+          printf("%%%d: No such job\n", a);
+          return 1;
+        }
+        printf("(%d): No such process\n", a);
+        return 1;
+      }
+
 
       if( updater->state != ST) {
         //error
       } else {
+        printf("[%d] (%d) %s", updater->jid, updater->pid, updater->cmdline);
         updater->state = BG;
         kill(0-updater->pid, SIGCONT);
       }
 
       return 1;
+
+
+
+
+
+
     } else if(strcmp(argv[0], fg) == 0) {
 
+
       if(argCount < 2) {
-        printf("found one\n");
+        printf("bg command requires PID or %%jobid argument\n");
+        return 1;
+      }
+
+
+      int percentFound = 0;
+
+      char* c = argv[1];
+      if(*c == '%') {
+        c++;
+        percentFound++;
+      }
+      int a = atoi(c);
+
+      if(a == 0) {
+        printf("bg: argument must be a PID or %%jobid\n");
+        return 1;
       }
 
 
 
-
-
-
-      struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));;
-
-
-      char* c = argv[1];
-
-      if(*c == '%') {
-        //background getjob
-        c++;
-        int a = atoi(c);
+      struct job_t* updater  = getjobpid(jobs, a);
+      if(percentFound == 1) {
         updater = getjobjid(jobs, a);
       }
 
 
+      if(updater == NULL) {
+        if(percentFound == 1) {
+          printf("%%%d: No such job\n", a);
+          return 1;
+        }
+        printf("(%d): No such process\n", a);
+        return 1;
+      }
       if(updater->state != ST && updater->state != BG) {
         //error
       } else {
