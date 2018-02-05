@@ -135,11 +135,8 @@ int main(int argc, char **argv)
 	/* Read command line */
 	if (emit_prompt) {
 	    printf("%s", prompt);
-      printf("Hello from the prompt\n");
 	    fflush(stdout);
 	}
-  printf("Hello from after prompt\n");
-  fflush(stdout);
 
 
 
