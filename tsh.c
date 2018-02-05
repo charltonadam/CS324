@@ -411,7 +411,6 @@ void sigchld_handler(int sig)
         deletejob(jobs, p);
         //do something else, the process just ran its course
       } else if(WIFSIGNALED(status) == 1) {
-        printf("Job [%d] (%d) terminated by signal %d\n", updater->jid, updater->pid, sig);
         deletejob(jobs, p);
         //child was terminated by the terminator
       }
@@ -429,6 +428,7 @@ void sigint_handler(int sig)
     if(p != 0)
     {
         struct job_t* updater  = getjobpid(jobs, p);
+        printf("Job [%d] (%d) terminated by signal %d\n", updater->jid, updater->pid, sig);
         kill(0-p, sig);
     }
 
