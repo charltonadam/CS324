@@ -312,16 +312,16 @@ int builtin_cmd(char **argv)
       //TODO: implement % for job IDs
 
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));
-      int a = atoi(argv[1]);
-      if(a < 0 || a > 16) {
-        return 1;
-      }
+      char* c = argv[1];
 
-      if(argv[1][0] == '%') {
+
+
+      if(*c == '%') {
+        c++;
+        int a = atoi(c);
+
         //background getjob
-        printf("ok, it works somehow\n");
-        printf("%d\n", atoi(argv[1]));
-        updater = getjobjid(jobs, atoi(argv[1]));
+        updater = getjobjid(jobs, a);
       }
 
       if( updater->state != ST) {
@@ -335,14 +335,15 @@ int builtin_cmd(char **argv)
     } else if(strcmp(argv[0], fg) == 0) {
 
       struct job_t* updater  = getjobpid(jobs, atoi(argv[1]));;
-      int a = atoi(argv[1]);
-      if(a < 0 || a > 16) {
-        return 1;
-      }
 
-      if(argv[1][0] == '%') {
+
+      char* c = argv[1];
+
+      if(*c == '%') {
         //background getjob
-        updater = getjobjid(jobs, atoi(argv[1]));
+        c++;
+        int a = atoi(c);
+        updater = getjobjid(jobs, a);
       }
 
 
