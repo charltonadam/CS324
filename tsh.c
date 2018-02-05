@@ -399,7 +399,8 @@ void sigchld_handler(int sig)
 
     pid_t p;
     int status;
-    while( (p = waitpid(-1, &status, WNOHANG | WUNTRACED)) != -1) {
+    p = waitpid(-1, &status, WNOHANG | WUNTRACED)
+
 
       struct job_t* updater = getjobpid(jobs, p);
 
@@ -414,7 +415,6 @@ void sigchld_handler(int sig)
         deletejob(jobs, p);
         //child was terminated by the terminator
       }
-    }
     return;
 }
 
