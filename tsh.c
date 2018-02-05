@@ -357,6 +357,7 @@ int builtin_cmd(char **argv)
 
 
 
+
       return 1;
     }
 
@@ -446,8 +447,6 @@ void sigint_handler(int sig)
 void sigtstp_handler(int sig)
 {
     pid_t p = fgpid(jobs);
-    printf("%d", p);
-    fflush(stdout);
     if(p != 0)
     {
         struct job_t* updater  = getjobpid(jobs, p);
