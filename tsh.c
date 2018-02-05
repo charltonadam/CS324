@@ -399,7 +399,7 @@ void sigchld_handler(int sig)
 
     pid_t p;
     int status;
-    p = waitpid(-1, &status, WNOHANG | WUNTRACED)
+    p = waitpid(-1, &status, WNOHANG | WUNTRACED);
 
 
       struct job_t* updater = getjobpid(jobs, p);
