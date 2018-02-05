@@ -42,6 +42,7 @@ char prompt[] = "tsh> ";    /* command line prompt (DO NOT CHANGE) */
 int verbose = 0;            /* if true, print additional output */
 int nextjid = 1;            /* next job ID to allocate */
 char sbuf[MAXLINE];         /* for composing sprintf messages */
+int argCount = 0;
 
 struct job_t {              /* The job struct */
     pid_t pid;              /* job PID */
@@ -281,6 +282,7 @@ int parseline(const char *cmdline, char **argv)
 	}
     }
     argv[argc] = NULL;
+    argCount = argc;
 
     if (argc == 0)  /* ignore blank line */
 	return 1;
@@ -310,7 +312,7 @@ int builtin_cmd(char **argv)
       return 1;
     } else if(strcmp(argv[0], bg) == 0) {
 
-      if(argv[1] == NULL) {
+      if(argCount < 2) {
         printf("found one\n");
       }
 
@@ -339,7 +341,7 @@ int builtin_cmd(char **argv)
       return 1;
     } else if(strcmp(argv[0], fg) == 0) {
 
-      if(argv[1] == NULL) {
+      if(argCount < 2) {
         printf("found one\n");
       }
 
