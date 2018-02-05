@@ -429,7 +429,6 @@ void sigint_handler(int sig)
     if(p != 0)
     {
         struct job_t* updater  = getjobpid(jobs, p);
-        printf("Job [%d] (%d) stopped by signal %d\n", updater->jid, updater->pid, sig);
         kill(0-p, sig);
     }
 
