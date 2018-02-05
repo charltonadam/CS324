@@ -135,8 +135,14 @@ int main(int argc, char **argv)
 	/* Read command line */
 	if (emit_prompt) {
 	    printf("%s", prompt);
+      printf("Hello from the prompt\n");
 	    fflush(stdout);
 	}
+  printf("Hello from after prompt\n");
+  fflush(stdout);
+
+
+
 	if ((fgets(cmdline, MAXLINE, stdin) == NULL) && ferror(stdin))
 	    app_error("fgets error");
 	if (feof(stdin)) { /* End of file (ctrl-d) */
@@ -186,6 +192,7 @@ void eval(char *cmdline)
 
       setpgid(0,0);
       execve(arguments[0], &arguments[0], newenviron);
+
 
       exit(0);   //I don't know whats going on, so exit it for now
     }
@@ -318,8 +325,6 @@ int builtin_cmd(char **argv)
         updater = getjobjid(jobs, atoi(argv[1]));
       }
 
-
-
       if( updater->state != ST) {
         //error
       } else {
@@ -397,7 +402,8 @@ void sigchld_handler(int sig)
 
     pid_t p;
     int status;
-    while( (p = waitpid(-1, &status, WNOHANG | WUNTRACED)) != 0) {
+    while( (p = waitpid(-1, &status, WNOHANG | WUNTRACED)) != -1) {
+
       struct job_t* updater = getjobpid(jobs, p);
 
       if(WIFSTOPPED(status) == 1) {
@@ -425,6 +431,9 @@ void sigint_handler(int sig)
     pid_t p = fgpid(jobs);
     if(p != 0)
     {
+        struct job_t* updater  = getjobpid(jobs, p);
+        deletejob(jobs, p);
+        printf("Job [%d] (%d) stopped by signal %d\n", updater->jid, updater->pid, sig);
         kill(0-p, sig);
     }
 
@@ -439,8 +448,13 @@ void sigint_handler(int sig)
 void sigtstp_handler(int sig)
 {
     pid_t p = fgpid(jobs);
+    printf("%d", p);
+    fflush(stdout);
     if(p != 0)
     {
+        struct job_t* updater  = getjobpid(jobs, p);
+        updater->state = ST;
+        printf("Job [%d] (%d) stopped by signal %d\n", updater->jid, updater->pid, sig);
         kill(0-p, sig);
     }
     return;
