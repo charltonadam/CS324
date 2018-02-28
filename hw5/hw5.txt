@@ -1,0 +1,4 @@
+1. done
+2. a. socket(), and connect()
+
+2. b. 
