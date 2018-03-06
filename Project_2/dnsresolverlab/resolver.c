@@ -151,6 +151,8 @@ int name_ascii_to_wire(char *name, unsigned char *wire) {	//wire length is name 
 
 char *name_ascii_from_wire2(unsigned char *wire, int location) {
 
+	printf("%d\n", location);
+
 
 	int currentBuilderSpot = 0;
 	char* builder = (char *)malloc((500) * sizeof(char));
@@ -160,6 +162,7 @@ char *name_ascii_from_wire2(unsigned char *wire, int location) {
 
 		if(wire[location] >= 192) {
 			char* nextValue = name_ascii_from_wire2(wire, wire[location + 1]);
+			strcat(builder, ".");
 			strcat(builder, nextValue);
 			return builder;
 		}
@@ -169,13 +172,16 @@ char *name_ascii_from_wire2(unsigned char *wire, int location) {
 			currentBuilderSpot++;
 		}
 		countdown = (int) wire[location];
+		//printf("%d\n", countdown);
 		location++;
 		for(;countdown > 0; countdown--) {
 			builder[currentBuilderSpot] = wire[location];
+			//printf("%s\n", builder);
 			currentBuilderSpot++;
 			location++;
 		}
 	}
+	printf("\n\n\n");
 
 	return builder;
 
@@ -192,7 +198,10 @@ char *name_ascii_from_wire(unsigned char *wire) {
 	int countdown = -1;
 	while(wire[currentResponseLocation] != (char) 0) {
 		if(wire[currentResponseLocation] >= 192) {
+			//printf("recursive\n");
 			char* nextValue = name_ascii_from_wire2(wire, wire[currentResponseLocation + 1]);
+			//printf("%s\n", nextValue);
+			strcat(builder, ".");
 			strcat(builder, nextValue);
 			currentResponseLocation += 2;
 			return builder;
@@ -206,6 +215,7 @@ char *name_ascii_from_wire(unsigned char *wire) {
 		currentResponseLocation++;
 		for(;countdown > 0; countdown--) {
 			builder[currentBuilderSpot] = wire[currentResponseLocation];
+			//printf("%s\n", builder);
 			currentBuilderSpot++;
 			currentResponseLocation++;
 		}
@@ -333,9 +343,11 @@ dns_answer_entry *resolve(char *qname, char *server) {
 	if((unsigned int)response[currentResponseLocation] >= 192) {
 		//it has to do with something, I am not sure
 		currentResponseLocation++;
-		int location = response[currentResponseLocation];
+		printf("%d\n", currentResponseLocation);
+		int location = (unsigned int) response[currentResponseLocation];
+		printf("%d------\n", location);
 		owner = name_ascii_from_wire2(response, location);
-		printf("hi\n");
+		printf("owner: %s\n", owner);
 
 	} else {
 		//printf("%d\n", response[currentResponseLocation]);
