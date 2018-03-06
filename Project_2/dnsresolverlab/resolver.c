@@ -335,10 +335,12 @@ dns_answer_entry *resolve(char *qname, char *server) {
 		currentResponseLocation++;
 		int location = response[currentResponseLocation];
 		owner = name_ascii_from_wire2(response, location);
+		printf("hi\n");
 
 	} else {
 		//printf("%d\n", response[currentResponseLocation]);
 		owner = name_ascii_from_wire(response);
+		printf("bye\n");
 	}
 	currentResponseLocation += 1;
 
