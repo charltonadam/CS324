@@ -304,7 +304,7 @@ dns_answer_entry *resolve(char *qname, char *server) {
 	currentResponseLocation = 12;
 
 	char* returnName = name_ascii_from_wire(response);
-	print_bytes(response, size);
+	//print_bytes(response, size);
 	//fflush(stdout);
 	char* owner;
 
@@ -353,8 +353,8 @@ dns_answer_entry *resolve(char *qname, char *server) {
 	currentResponseLocation += 2;
 	//printf("%d\n", currentResponseLocation);
 
-	//if(strcmp(returnName, owner) == 0) {
-	if(1) {
+	if(strcmp(returnName, owner) == 0) {
+	//if(1) {
 		if(tags == 1) {
 
 			char* destination = malloc(sizeof(char) * 100);
