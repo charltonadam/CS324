@@ -352,6 +352,8 @@ dns_answer_entry *resolve(char *qname, char *server) {
 	int rDataLength = (response[currentResponseLocation] << 8) | response[currentResponseLocation + 1];
 	currentResponseLocation += 2;
 	//printf("%d\n", currentResponseLocation);
+	printf("%s\n", owner);
+	printf("%s\n", returnName);
 
 	if(strcmp(returnName, owner) == 0) {
 	//if(1) {
