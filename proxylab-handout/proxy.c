@@ -102,6 +102,7 @@ void threadHandleStuff(int connfd) {
     int sendingFD = open_clientfd(host, port);
 
     char* finalRequest = malloc(MAX_OBJECT_SIZE);
+    memset(finalRequest, 0, MAX_OBJECT_SIZE);
 
     strcat(finalRequest, "GET ");
     strcat(finalRequest, request);
