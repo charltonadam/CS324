@@ -151,9 +151,6 @@ int name_ascii_to_wire(char *name, unsigned char *wire) {	//wire length is name 
 
 char *name_ascii_from_wire2(unsigned char *wire, int location) {
 
-	printf("%d\n", location);
-
-
 	int currentBuilderSpot = 0;
 	char* builder = (char *)malloc((500) * sizeof(char));
 
@@ -181,7 +178,6 @@ char *name_ascii_from_wire2(unsigned char *wire, int location) {
 			location++;
 		}
 	}
-	printf("\n\n\n");
 
 	return builder;
 
@@ -330,29 +326,33 @@ dns_answer_entry *resolve(char *qname, char *server) {
 
 	unsigned int answers = (response[6] << 8) | response[7];
 
+
 	//printf("%d\n", answers);
 
 
+	if(answers == 0) {
+		return NULL;
+	}
 
+	int override = 0;
 
 	//the for loop starts here :TODO
 
 	for(; answers > 0; answers--) {
 
+
+
 	//do the compression stuff
 	if((unsigned int)response[currentResponseLocation] >= 192) {
 		//it has to do with something, I am not sure
 		currentResponseLocation++;
-		printf("%d\n", currentResponseLocation);
-		int location = (unsigned int) response[currentResponseLocation];
-		printf("%d------\n", location);
+		unsigned int location = (int) response[currentResponseLocation];
 		owner = name_ascii_from_wire2(response, location);
-		printf("owner: %s\n", owner);
+			override ++;
 
 	} else {
 		//printf("%d\n", response[currentResponseLocation]);
 		owner = name_ascii_from_wire(response);
-		printf("bye\n");
 	}
 	currentResponseLocation += 1;
 
@@ -366,10 +366,8 @@ dns_answer_entry *resolve(char *qname, char *server) {
 	int rDataLength = (response[currentResponseLocation] << 8) | response[currentResponseLocation + 1];
 	currentResponseLocation += 2;
 	//printf("%d\n", currentResponseLocation);
-	printf("%s\n", owner);
-	printf("%s\n", returnName);
 
-	if(strcmp(returnName, owner) == 0) {
+	if(strcmp(returnName, owner) == 0 || override > 1) {
 	//if(1) {
 		if(tags == 1) {
 
