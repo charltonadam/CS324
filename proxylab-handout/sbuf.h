@@ -5,7 +5,7 @@
 
 /* $begin sbuft */
 typedef struct {
-    int *buf;          /* Buffer array */         
+    int *buf;          /* Buffer array */
     int n;             /* Maximum number of slots */
     int front;         /* buf[(front+1)%n] is first item */
     int rear;          /* buf[rear%n] is last item */

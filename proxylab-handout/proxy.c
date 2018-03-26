@@ -16,11 +16,31 @@ void threadHandleStuff(int connfd);
 
 sbuf_t sbuf;
 
+typedef struct {
+    char* request;
+    char* response;
+    int maxSize;
+} request_response;
+
+typedef struct {
+    sem_t request;
+    sem_t response;
+} cache_mutex;
+
+int currentAddition;
+sem_t cache_addition;
+
 
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr = "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
 
 static const char *static_headers = "Connection: close\r\nProxy-Connection: close\r\n\r\n";
+
+
+sem_t request_locks[10];
+sem_t response_locks[10];
+request_response cache_data[10];
+
 
 int main(int argc, char * argv[])
 {
@@ -28,6 +48,16 @@ int main(int argc, char * argv[])
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     pthread_t tid;
+
+    sem_t * temp;
+    sem_t *temp2;
+    Sem_init(&cache_addition, 0, 1);
+    for(i = 0; i < 10; i++) {
+        temp = &request_locks[i];
+        temp2 = &response_locks[i];
+        Sem_init(temp, 0, 1);     //parameters of this might be different
+        Sem_init(temp2, 0, 1);
+    }
 
     if (argc != 2) {
 	fprintf(stderr, "usage: %s <port>\n", argv[0]);
@@ -70,6 +100,31 @@ void threadHandleStuff(int connfd) {
 
     char* request = strrchr(uri + 7, '/');
     //printf("Request: %s\n", request);
+
+
+    //TODO: right here, check the cache for similar URI's
+    int i;
+    for(i = 0; i < 10; i++) {
+        //TODO: first, wait for request permissions
+        P(&request_locks[i]);
+        request_response* temp = &cache_data[i];
+
+
+        if(strcmp(temp->request, uri)) {
+            //the request matches the cache, return the cached data
+            //TODO: wait for response data
+            V(&request_locks[i]);
+            P(&response_locks[i]);
+            rio_writen(connfd, temp->response, temp->maxSize);
+            V(&response_locks[i]);
+            return;
+        }
+        V(&request_locks[i]);
+    }
+    //if we get here, then there is no cached information for the request, get it new
+
+
+
 
     int requestLocation = request - uri;
 
@@ -130,6 +185,24 @@ void threadHandleStuff(int connfd) {
             totalSize++;
         }
     }
+
+
+    P(&cache_addition);
+    P(&request_locks[currentAddition]);
+    P(&response_locks[currentAddition]);
+
+    request_response * temp3 = &cache_data[currentAddition];
+    temp3->request = uri;
+    temp3->response = finalRequest;
+    temp3->maxSize = totalSize;
+    V(&response_locks[currentAddition]);
+    V(&response_locks[currentAddition]);
+    currentAddition++;
+    if(currentAddition > 9) {
+        currentAddition = 0;
+    }
+    V(&cache_addition);
+
 
     /*int i;
     for(i = 0; i < totalSize; i++) {
