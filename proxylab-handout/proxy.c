@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <signal.h>
-#include <sys/types.h>
 #include "csapp.h"
 #include "sbuf.h"
 
@@ -10,12 +8,11 @@
 #define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
 
-#define NTHREADS  20
+#define NTHREADS  80
 #define SBUFSIZE  20
 
 void *thread(void *vargp);
 void threadHandleStuff(int connfd);
-void sigint_handler(int sig);
 
 sbuf_t sbuf;
 
@@ -44,8 +41,6 @@ sem_t request_locks[10];
 sem_t response_locks[10];
 request_response cache_data[10];
 
-pthread_t* threadCatcher[20];
-
 
 int main(int argc, char * argv[])
 {
@@ -53,8 +48,6 @@ int main(int argc, char * argv[])
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     pthread_t tid;
-
-    Signal(SIGINT,  sigint_handler);   /* ctrl-c */
 
     sem_t * temp;
     sem_t *temp2;
@@ -73,26 +66,14 @@ int main(int argc, char * argv[])
     listenfd = Open_listenfd(argv[1]);
 
     sbuf_init(&sbuf, SBUFSIZE); //line:conc:pre:initsbuf
-    for (i = 0; i < NTHREADS; i++) {  /* Create worker threads */ //line:conc:pre:begincreate
+    for (i = 0; i < NTHREADS; i++)  /* Create worker threads */ //line:conc:pre:begincreate
 	   Pthread_create(&tid, NULL, thread, NULL);               //line:conc:pre:endcreate
-       threadCatcher[i] = &tid;
-    }
 
     while (1) {
        clientlen = sizeof(struct sockaddr_storage);
 	   connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
 	   sbuf_insert(&sbuf, connfd); /* Insert connfd in buffer */
     }
-}
-
-void sigint_handler(int sig) {
-    int i;
-
-    for(i = 0; i < 20; i++) {
-        pthread_kill(*threadCatcher[i], sig);
-    }
-
-    exit(0);
 }
 
 void *thread(void *vargp)
@@ -116,7 +97,6 @@ void threadHandleStuff(int connfd) {
         return;
 
     sscanf(input, "%s %s %s", type, uri, version);
-    free(input); //free(type); free(version);
 
     char* request = strrchr(uri + 7, '/');
     //printf("Request: %s\n", request);
@@ -124,16 +104,22 @@ void threadHandleStuff(int connfd) {
 
     //TODO: right here, check the cache for similar URI's
     int i;
+    printf("Pre-update\n");
+    fflush(stdout);
     for(i = 0; i < 10; i++) {
         if(i >= currentAddition) {
             V(&request_locks[i]);
             break;
         }
         //TODO: first, wait for request permissions
+        printf("cache check 1\n");
+        fflush(stdout);
 
         P(&request_locks[i]);
         request_response* temp = &cache_data[i];
 
+        printf("cache check 2\n");
+        fflush(stdout);
 
         if(temp == NULL) {
             V(&request_locks[i]);
@@ -143,18 +129,23 @@ void threadHandleStuff(int connfd) {
         if(strcmp(temp->request, uri) == 0) {
             //the request matches the cache, return the cached data
             //TODO: wait for response data
+            printf("cache check 3\n");
+            fflush(stdout);
 
             V(&request_locks[i]);
             P(&response_locks[i]);
+            printf("%s\n", temp->response );
+            fflush(stdout);
             rio_writen(connfd, temp->response, temp->maxSize);
-            printf("Cached Data: %s", uri);
             V(&response_locks[i]);
             return;
         }
         V(&request_locks[i]);
     }
     //if we get here, then there is no cached information for the request, get it new
-    printf("Non-Cached data: %s", uri);
+    printf("not-cached\n");
+    fflush(stdout);
+
 
 
     int requestLocation = request - uri;
@@ -179,7 +170,6 @@ void threadHandleStuff(int connfd) {
         char* tempHost = Malloc(sizeof(char) * (portLocation));
         memcpy(tempHost, host, sizeof(char) * (portLocation));
         host = tempHost;
-        free(tempHost);
     }
 
     //printf("Host: %s\n", host);
@@ -235,9 +225,6 @@ void threadHandleStuff(int connfd) {
     }
     V(&cache_addition);
 
-    free(host);
-    free(request);
-    free(finalRequest);
 
     /*int i;
     for(i = 0; i < totalSize; i++) {
