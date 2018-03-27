@@ -104,22 +104,16 @@ void threadHandleStuff(int connfd) {
 
     //TODO: right here, check the cache for similar URI's
     int i;
-    printf("Pre-update\n");
-    fflush(stdout);
     for(i = 0; i < 10; i++) {
         if(i >= currentAddition) {
             V(&request_locks[i]);
             break;
         }
         //TODO: first, wait for request permissions
-        printf("cache check 1\n");
-        fflush(stdout);
 
         P(&request_locks[i]);
         request_response* temp = &cache_data[i];
 
-        printf("cache check 2\n");
-        fflush(stdout);
 
         if(temp == NULL) {
             V(&request_locks[i]);
@@ -129,22 +123,18 @@ void threadHandleStuff(int connfd) {
         if(strcmp(temp->request, uri) == 0) {
             //the request matches the cache, return the cached data
             //TODO: wait for response data
-            printf("cache check 3\n");
-            fflush(stdout);
 
             V(&request_locks[i]);
             P(&response_locks[i]);
-            printf("%s\n", temp->response );
-            fflush(stdout);
             rio_writen(connfd, temp->response, temp->maxSize);
+            printf("cached response: %s\n", uri);
             V(&response_locks[i]);
             return;
         }
         V(&request_locks[i]);
     }
     //if we get here, then there is no cached information for the request, get it new
-    printf("not-cached\n");
-    fflush(stdout);
+    printf("non-cached response: %s\n", uri);
 
 
 
