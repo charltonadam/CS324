@@ -31,15 +31,10 @@ int main(int argc, char **argv)
     while (1) {
 	clientlen = sizeof(clientaddr);
 	connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen); //line:netp:tiny:accept
-        if (Fork() == 0) { /* Child */ //line:netp:tiny:fork
-	    Close(listenfd);                                            //line:netp:tiny:close
-            Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, 
-                        port, MAXLINE, 0);
-            printf("Accepted connection from (%s, %s)\n", hostname, port);
-	    doit(connfd);                                             //line:netp:tiny:doit
-	    Close(connfd);                                            //line:netp:tiny:close
-	    exit(0);
-	}
+        Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, 
+                    port, MAXLINE, 0);
+        printf("Accepted connection from (%s, %s)\n", hostname, port);
+	doit(connfd);                                             //line:netp:tiny:doit
 	Close(connfd);                                            //line:netp:tiny:close
     }
 }
@@ -124,21 +119,24 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
 {
     char *ptr;
 
-    ptr = index(uri, '?');                           //line:netp:parseuri:beginextract
-    if (ptr) {
-        strcpy(cgiargs, ptr+1);
-        *ptr = '\0';
-    }
-    else
-        strcpy(cgiargs, "");                         //line:netp:parseuri:endextract
-    strcpy(filename, ".");                           //line:netp:parseuri:beginconvert1
-    strcat(filename, uri);                           //line:netp:parseuri:endconvert2
     if (!strstr(uri, "cgi-bin")) {  /* Static content */ //line:netp:parseuri:isstatic
+	strcpy(cgiargs, "");                             //line:netp:parseuri:clearcgi
+	strcpy(filename, ".");                           //line:netp:parseuri:beginconvert1
+	strcat(filename, uri);                           //line:netp:parseuri:endconvert1
 	if (uri[strlen(uri)-1] == '/')                   //line:netp:parseuri:slashcheck
 	    strcat(filename, "home.html");               //line:netp:parseuri:appenddefault
 	return 1;
     }
     else {  /* Dynamic content */                        //line:netp:parseuri:isdynamic
+	ptr = index(uri, '?');                           //line:netp:parseuri:beginextract
+	if (ptr) {
+	    strcpy(cgiargs, ptr+1);
+	    *ptr = '\0';
+	}
+	else 
+	    strcpy(cgiargs, "");                         //line:netp:parseuri:endextract
+	strcpy(filename, ".");                           //line:netp:parseuri:beginconvert2
+	strcat(filename, uri);                           //line:netp:parseuri:endconvert2
 	return 0;
     }
 }

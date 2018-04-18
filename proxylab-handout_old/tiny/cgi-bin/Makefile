@@ -1,13 +1,10 @@
 CC = gcc
 CFLAGS = -O2 -Wall -I ..
 
-all: adder slow
+all: adder
 
 adder: adder.c
 	$(CC) $(CFLAGS) -o adder adder.c
 
-slow: slow.c
-	$(CC) $(CFLAGS) -o slow slow.c
-
 clean:
-	rm -f adder slow *~
+	rm -f adder *~
