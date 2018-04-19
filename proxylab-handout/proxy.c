@@ -55,6 +55,9 @@ FILE *fp;
 
 int main(int argc, char **argv)
 {
+
+    fp = fopen("log.txt", "w");
+
     int listenfd, connfd;
     struct sockaddr_storage clientaddr;
     socklen_t clientlen;
@@ -78,7 +81,16 @@ int main(int argc, char **argv)
 
         sscanf(input, "%s %s %s", type, uri, version);
 
+
+
         logURI(uri);
+
+        free(type);
+        free(uri);
+        free(version);
+        free(input);
+
+        /*
 
         char* request = strrchr(uri + 7, '/');
 
@@ -152,18 +164,17 @@ int main(int argc, char **argv)
         }
 
 
-        /*int i;
-        for(i = 0; i < totalSize; i++) {
-            //printf("%c", fullResponse[i]);
-        }*/
 
         rio_writen(connfd, fullResponse, totalSize);
+
+        */
 
 
     }
 
 
 
+    fclose(fp);
 
     return 0;
 }
@@ -173,9 +184,8 @@ int main(int argc, char **argv)
 
 void logURI(char* uri) {
 
-    fp = fopen("log.txt", "w");
+
     fputs(uri, fp);
     fputs("\n", fp);
-    fclose(fp);
 
 }
