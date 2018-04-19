@@ -33,6 +33,7 @@ FILE *fp;
 
 void sigint_handler() {
     fclose(fp);
+    exit(0);
 }
 
 
@@ -178,7 +179,6 @@ int main(int argc, char **argv)
 void logURI(char* uri) {
 
 
-    fputs(uri, fp);
-    fputs("\n", fp);
+    fprintf(fp, "%s\n", uri);
 
 }
