@@ -87,6 +87,8 @@ int main(int argc, char **argv)
         fprintf(fp, "%s\n", uri);
         free(input);
         free(temp);
+
+        close(connfd);
     }
     return 0;
 }
