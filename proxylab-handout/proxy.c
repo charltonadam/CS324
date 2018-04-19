@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     int listenfd, connfd;
     struct sockaddr_storage clientaddr;
     socklen_t clientlen;
-    fp = fopen("log.txt", "w");
+
 
     while(1) {
 
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 
 
 
-    fclose(fp);
+
     return 0;
 }
 
@@ -171,7 +171,9 @@ int main(int argc, char **argv)
 
 void logURI(char* uri) {
 
+    fp = fopen("log.txt", "w");
     fputs(uri, fp);
     fputs("\n", fp);
+    fclose(fp);
 
 }
