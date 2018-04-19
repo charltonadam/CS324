@@ -40,6 +40,7 @@ int main(int argc, char **argv)
 {
 
     fp = fopen("log.txt", "w");
+    fprintf(fp, "one\n");
 
     Signal(SIGINT, sigint_handler);
 
@@ -56,13 +57,15 @@ int main(int argc, char **argv)
 
         clientlen = sizeof(struct sockaddr_storage);
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
-
+        fprintf(fp, "two\n");
 
         char type[MAXLINE], uri[MAXLINE], version[MAXLINE];
+
         temp = malloc(MAXLINE);
         input = malloc(MAX_OBJECT_SIZE);
 
         int inputLocation, len;
+        fprintf(fp, "three\n");
 
         while ((len = recv(connfd, temp, MAXLINE, 0)) > 0) {
 
@@ -71,11 +74,13 @@ int main(int argc, char **argv)
                 input[inputLocation + i] = temp[i];
             }
             inputLocation += len;
+            fprintf(fp, "loop\n");
 
         }
 
         sscanf(input, "%s %s %s", type, uri, version);
 
+        fprintf(fp, "four\n");
 
 
         fprintf(fp, "%s\n", uri);
