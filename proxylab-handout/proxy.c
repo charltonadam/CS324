@@ -22,8 +22,6 @@
 void logURI(char* uri);
 void sigint_handler();
 
-int efd;
-
 
 FILE *fp;
 
@@ -59,12 +57,19 @@ int main(int argc, char **argv)
 
 
         char type[MAXLINE], uri[MAXLINE], version[MAXLINE];
+        char* temp = malloc(MAXLINE);
         char* input = malloc(MAX_OBJECT_SIZE);
+        int inputLocation, len;
 
-        rio_t rio;
-        Rio_readinitb(&rio, connfd);
-        if(!Rio_readlineb(&rio, input, MAXLINE))
-            return 0;
+        while ((len = recv(connfd, temp, MAXLINE, 0)) > 0) {
+
+            int i;
+            for(i = 0; i < len; i++) {
+                input[inputLocation + i] = temp[i];
+            }
+            inputLocation += len;
+
+        }
 
         sscanf(input, "%s %s %s", type, uri, version);
 
@@ -73,6 +78,7 @@ int main(int argc, char **argv)
         logURI(uri);
 
         free(input);
+        free(temp);
 
         /*
 
