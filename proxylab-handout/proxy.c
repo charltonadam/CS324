@@ -48,12 +48,12 @@ int main(int argc, char **argv)
     struct sockaddr_storage clientaddr;
     socklen_t clientlen;
 
-
+    listenfd = Open_listenfd(argv[1]);
 
 
     while(1) {
 
-        listenfd = Open_listenfd(argv[1]);
+
 
         clientlen = sizeof(struct sockaddr_storage);
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
