@@ -9,13 +9,8 @@
 #include<sys/epoll.h>
 #include<sys/socket.h>
 
-#define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
 
-#define MAXEVENTS 64
-
-/* Recommended max cache and object sizes */
-#define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
 
 
@@ -24,6 +19,8 @@ void sigint_handler();
 
 
 FILE *fp;
+char* temp;
+char* input;
 
 
 
@@ -33,6 +30,8 @@ FILE *fp;
 
 void sigint_handler() {
     fclose(fp);
+    free(input);
+    free(temp);
     exit(0);
 }
 
@@ -49,6 +48,8 @@ int main(int argc, char **argv)
     socklen_t clientlen;
 
 
+
+
     while(1) {
 
         listenfd = Open_listenfd(argv[1]);
@@ -58,8 +59,9 @@ int main(int argc, char **argv)
 
 
         char type[MAXLINE], uri[MAXLINE], version[MAXLINE];
-        char* temp = malloc(MAXLINE);
-        char* input = malloc(MAX_OBJECT_SIZE);
+        temp = malloc(MAXLINE);
+        input = malloc(MAX_OBJECT_SIZE);
+
         int inputLocation, len;
 
         while ((len = recv(connfd, temp, MAXLINE, 0)) > 0) {
@@ -76,109 +78,9 @@ int main(int argc, char **argv)
 
 
 
-        logURI(uri);
-
+        fprintf(fp, "%s\n", uri);
         free(input);
         free(temp);
-
-        /*
-
-        char* request = strrchr(uri + 7, '/');
-
-
-        int requestLocation = request - uri;
-
-        char* host = Malloc(sizeof(char) * (requestLocation-7));
-        memcpy(host, uri+7, sizeof(char) * (requestLocation-7));
-
-        char* default_port = "80";
-
-        char* port = strrchr(host, ':');
-        if(port == NULL) {
-            //error stuff
-            port = default_port;
-        } else {
-            //normal, there is a port, refresh how the host looks
-
-            //TODO: increment the pointer by one somehow
-            port = port + 1;
-
-
-            int portLocation = (port - host) - 1;
-            char* tempHost = Malloc(sizeof(char) * (portLocation));
-            memcpy(tempHost, host, sizeof(char) * (portLocation));
-            host = tempHost;
-        }
-
-        int sendingFD = open_clientfd(host, port);
-
-        char* finalRequest = malloc(MAX_OBJECT_SIZE);
-        memset(finalRequest, 0, MAX_OBJECT_SIZE);
-
-        strcat(finalRequest, "GET ");
-        strcat(finalRequest, request);
-        strcat(finalRequest, " HTTP/1.0\r\n");
-        strcat(finalRequest, "Host: ");
-        strcat(finalRequest, host);
-        strcat(finalRequest, "\r\n");
-        strcat(finalRequest, user_agent_hdr);
-        strcat(finalRequest, static_headers);
-
-        //logURI(finalRequest);
-
-        //printf("%s", finalRequest);
-
-        rio_writen(sendingFD, finalRequest, strlen(finalRequest));
-
-        char tempResponse[MAX_OBJECT_SIZE];
-        char fullResponse[MAX_OBJECT_SIZE];
-        int size;
-
-        int totalSize = 0;
-        while((size = recv(sendingFD, tempResponse, MAX_OBJECT_SIZE, 0)) > 0) {
-
-            int i;
-            for(i = 0; i < size; i++) {
-                fullResponse[totalSize] = tempResponse[i];
-                totalSize++;
-            }
-        }
-
-
-        request_response * temp3 = &cache_data[currentAddition];
-        temp3->request = uri;
-        temp3->response = fullResponse;
-        temp3->maxSize = totalSize;
-        currentAddition++;
-        if(currentAddition > 9) {
-            currentAddition = 0;
-        }
-
-
-
-        rio_writen(connfd, fullResponse, totalSize);
-
-        */
-
-
     }
-
-
-
-
     return 0;
-}
-
-
-
-
-
-
-
-
-void logURI(char* uri) {
-
-
-    fprintf(fp, "%s\n", uri);
-
 }
