@@ -78,6 +78,8 @@ int main(int argc, char **argv)
 
         sscanf(input, "%s %s %s", type, uri, version);
 
+        logURI(uri);
+
         char* request = strrchr(uri + 7, '/');
 
 
@@ -119,7 +121,7 @@ int main(int argc, char **argv)
         strcat(finalRequest, user_agent_hdr);
         strcat(finalRequest, static_headers);
 
-        logURI(finalRequest);
+        //logURI(finalRequest);
 
         //printf("%s", finalRequest);
 
