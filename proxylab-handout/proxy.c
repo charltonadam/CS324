@@ -75,6 +75,9 @@ int listenfd;
 
 int main(int argc, char **argv)
 {
+
+    printf("made it somehow");
+
     fp = fopen("log.txt", "w");
 
 
@@ -299,7 +302,7 @@ void readRequest(struct stateSaver *ea) {
 
 void sendRequest(struct stateSaver *ea) {
 
-printf("made it somehow");
+
 }
 
 
