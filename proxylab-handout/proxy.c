@@ -64,7 +64,8 @@ int main(int argc, char **argv)
         temp = malloc(MAXLINE);
         input = malloc(MAX_OBJECT_SIZE);
 
-        int inputLocation, len;
+        int inputLocation = 0;
+        int len = 0;
         fprintf(fp, "three\n");
 
         while ((len = recv(connfd, temp, MAXLINE, 0)) > 0) {
